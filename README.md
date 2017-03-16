@@ -13,7 +13,7 @@ You’ll need to have Node >= 4 on your machine.
 We strongly recommend to use Node >= 6 and npm >= 3 for faster installation speed and better disk usage
 
 ## How to develop microsite
-- Download Microsite develop environment ZIP file.
+- Download [Microsite develop environment](https://github.com/theplant/qor-microsite-develop/archive/v1.0-beta.zip) ZIP file.
 - Unzip file, go to `microsite-develop` directory.
 - Create a folder(e.g. named `src`) or move your microsite project folder into `microsite-develop` directory(:bulb: **Tip:** All below setups assume your microsite assets folder name is `src`, you should change it if you rename the assets folder).
 - Install required Node.js modules

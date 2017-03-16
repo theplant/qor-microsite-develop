@@ -2,24 +2,25 @@
 
 var paths = require('../config/paths');
 var fs = require('fs-extra');
-var microsite = require('../microsite.config');
+var s3info = require('../microsite.config').S3;
 var AWS = require('aws-sdk');
 var path = require('path');
 var mime = require('mime');
 var chalk = require('chalk');
-const BUCKET_NAME = '/' + microsite.S3.bucketName + microsite.S3.prefix;
+const BUCKET_NAME = '/' + s3info.bucketName + s3info.prefix;
 const buildPath = paths.appBuild + '/';
 
 AWS.config.update({
-    accessKeyId: microsite.S3.accessKeyId,
-    secretAccessKey: microsite.S3.secretAccessKey,
-    region: microsite.S3.region
+    accessKeyId: s3info.accessKeyId,
+    secretAccessKey: s3info.secretAccessKey,
+    region: s3info.region
 });
 
 var s3 = new AWS.S3({ apiVersion: '2006-03-01' });
 
 function syncBuildToS3() {
 
+    // upload build folder files.
     uploadFolder();
 
     fs.readdir(buildPath, function(err, items) {
@@ -27,12 +28,12 @@ function syncBuildToS3() {
             console.log(err);
         }
 
+        // upload build subfolder files.
         for (var i = 0; i < items.length; i++) {
             fileInfo = fs.lstatSync(buildPath + items[i]);
             if (fileInfo.isDirectory()) {
                 uploadFolder(items[i]);
             }
-
         }
     });
 }
@@ -50,7 +51,7 @@ function uploadFolder(folderName) {
 
     fileList = getFileList(filePath);
 
-    fileList.forEach(function(entry) {
+    fileList.forEach(entry => {
         // console.log('>>>>>>>>>>>>>>>> Uploading: ' + filePath + entry);
         uploadFile(filePath + entry, folderName);
     });
@@ -63,7 +64,9 @@ function getFileList(path) {
     filesFound = fs.readdirSync(path);
     for (i = 0; i < filesFound.length; i++) {
         fileInfo = fs.lstatSync(path + filesFound[i]);
-        if (fileInfo.isFile()) fileList.push(filesFound[i]);
+        if (fileInfo.isFile()){
+            fileList.push(filesFound[i]);
+        }
     }
 
     return fileList;

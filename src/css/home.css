@@ -1,0 +1,31 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+.app {
+    text-align: center;
+}
+
+.header {
+    background-color: #222;
+    padding: 20px;
+    color: white;
+}
+
+.intro {
+    font-size: 24px;
+    width: 40%;
+    font-weight: normal;
+    margin: 24px auto;
+}
+
+a {
+    color: #0366d6;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}

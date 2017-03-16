@@ -24,19 +24,19 @@ We strongly recommend to use Node >= 6 and npm >= 3 for faster installation spee
 - Open `microsite.config.js` file to modify microsite config
 
   - `S3` config.
-
   - `WatchPath` property to your real work path(`/Users/yourname/project/microsite-develop/src`).
-
   - `Webpack` config,(If you don't need webpack tool to bundle your assets. just ignore this config).
-
   - `PreviewUrl` check admin microsite preview url, copy to here.
 
 
 ### For don't need compile assets project
 1. Open terminal
 2. Go to the project directory
+
 ```$ cd microsite-develop```
+
 3. Run script
+
 ```$ npm run watch```
 
 sever will watch directory which defined in `microsite.config.js ` file `WatchPath` property. if file changed or added, will upload to S3 immediately.
@@ -50,9 +50,13 @@ sever will watch directory which defined in `microsite.config.js ` file `WatchPa
  - `appSrc` same as `WatchPath`, but just need folder name. default is `src`.
 2. Open terminal
 3. Go to the project directory
+
 ```$ cd microsite-develop```
+
 4. Run script
+
 ```$ npm run dev```
+
 5. Start developing
 
 

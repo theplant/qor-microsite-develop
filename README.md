@@ -18,7 +18,7 @@ We strongly recommend to use Node >= 6 and npm >= 3 for faster installation spee
 - Create a folder(e.g. named `src`) or move your microsite project folder into `microsite-develop` directory.
 - Install required Node.js modules
 
-`$ npm install`
+```$ npm install```
 
 - Copy your all microsite assets files into `microsite-develop/src` directory.
 - Open `microsite.config.js` file to modify microsite config
@@ -35,9 +35,9 @@ We strongly recommend to use Node >= 6 and npm >= 3 for faster installation spee
 ### For don't need compile assets project
 1. Open terminal
 2. Go to the project directory
-`$ cd microsite-develop`
+```$ cd microsite-develop```
 3. Run script
-`$ npm run watch`
+```$ npm run watch```
 
 sever will watch directory which defined in `microsite.config.js ` file `WatchPath` property. if file changed or added, will upload to S3 immediately.
 4. Start developing
@@ -50,11 +50,9 @@ sever will watch directory which defined in `microsite.config.js ` file `WatchPa
  - `appSrc` same as `WatchPath`, but just need folder name. default is `src`.
 2. Open terminal
 3. Go to the project directory
-
-`$ cd microsite-develop`
+```$ cd microsite-develop```
 4. Run script
-
-`$ npm run dev`
+```$ npm run dev```
 5. Start developing
 
 

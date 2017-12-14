@@ -1,34 +1,40 @@
 'use strict';
 
+// Do this as the first thing so that any code reading it knows the right env.
+process.env.BABEL_ENV = 'development';
 process.env.NODE_ENV = 'development';
 
-// Load environment variables from .env file. Suppress warnings using silent
-// if this file is missing. dotenv will never modify any environment variables
-// that have already been set.
-// https://github.com/motdotla/dotenv
-require('dotenv').config({ silent: true });
+// Makes the script crash on unhandled rejections instead of silently
+// ignoring them. In the future, promise rejections that are not handled will
+// terminate the Node.js process with a non-zero exit code.
+process.on('unhandledRejection', err => {
+    throw err;
+});
 
-var chalk = require('chalk');
-var webpack = require('webpack');
-var WebpackDevServer = require('webpack-dev-server');
-var historyApiFallback = require('connect-history-api-fallback');
-var httpProxyMiddleware = require('http-proxy-middleware');
-var detect = require('detect-port');
-var checkRequiredFiles = require('react-dev-utils/checkRequiredFiles');
-var formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
-var getProcessForPort = require('react-dev-utils/getProcessForPort');
-var openBrowser = require('react-dev-utils/openBrowser');
-var prompt = require('react-dev-utils/prompt');
-var fs = require('fs');
-var config = require('../config/webpack.config.dev');
-var paths = require('../config/paths');
+// Ensure environment variables are read.
+require('../config/env');
 
-var proxyConfig = require('../config/proxy');
-var micrositePrefix = require('../config/micrositePrefix');
+const chalk = require('chalk');
+const webpack = require('webpack');
+const WebpackDevServer = require('webpack-dev-server');
+const historyApiFallback = require('connect-history-api-fallback');
+const httpProxyMiddleware = require('http-proxy-middleware');
+const detect = require('detect-port');
+const checkRequiredFiles = require('react-dev-utils/checkRequiredFiles');
+const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages');
+const getProcessForPort = require('react-dev-utils/getProcessForPort');
+const openBrowser = require('react-dev-utils/openBrowser');
+const inquirer = require('inquirer');
+const fs = require('fs');
+const config = require('../config/webpack.config.dev');
+const paths = require('../config/paths');
 
-var useYarn = fs.existsSync(paths.yarnLockFile);
-var cli = useYarn ? 'yarn' : 'npm';
-var isInteractive = process.stdout.isTTY;
+const proxyConfig = require('../config/proxy');
+const micrositePrefix = require('../config/micrositePrefix');
+
+const useYarn = fs.existsSync(paths.yarnLockFile);
+const cli = useYarn ? 'yarn' : 'npm';
+const isInteractive = process.stdout.isTTY;
 
 // Warn and crash if required files are missing
 if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs])) {
@@ -50,6 +56,7 @@ function setupCompiler(host, port, protocol) {
     // bundle, so if you refresh, it'll wait instead of serving the old one.
     // "invalid" is short for "bundle invalidated", it doesn't imply any errors.
     compiler.plugin('invalid', function() {
+        console.log('-----------------------------------------------------');
         console.log('Compiling...');
     });
 
@@ -58,7 +65,6 @@ function setupCompiler(host, port, protocol) {
     // "done" event fires when Webpack has finished recompiling the bundle.
     // Whether or not you have warnings or errors, you will get this event.
     compiler.plugin('done', function(stats) {
-
         // We have switched off the default Webpack output in WebpackDevServer
         // options so we are going to "massage" the warnings and errors and present
         // them in a readable focused way.
@@ -114,14 +120,8 @@ function setupCompiler(host, port, protocol) {
 function onProxyError(proxy) {
     return function(err, req, res) {
         var host = req.headers && req.headers.host;
-        console.log(
-            chalk.red('Proxy error:') + ' Could not proxy request ' + chalk.cyan(req.url) +
-            ' from ' + chalk.cyan(host) + ' to ' + chalk.cyan(proxy) + '.'
-        );
-        console.log(
-            'See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (' +
-            chalk.cyan(err.code) + ').'
-        );
+        console.log(chalk.red('Proxy error:') + ' Could not proxy request ' + chalk.cyan(req.url) + ' from ' + chalk.cyan(host) + ' to ' + chalk.cyan(proxy) + '.');
+        console.log('See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (' + chalk.cyan(err.code) + ').');
         console.log();
 
         // And immediately send the proper error response to the client.
@@ -129,29 +129,29 @@ function onProxyError(proxy) {
         if (res.writeHead && !res.headersSent) {
             res.writeHead(500);
         }
-        res.end('Proxy error: Could not proxy request ' + req.url + ' from ' +
-            host + ' to ' + proxy + ' (' + err.code + ').'
-        );
-    }
+        res.end('Proxy error: Could not proxy request ' + req.url + ' from ' + host + ' to ' + proxy + ' (' + err.code + ').');
+    };
 }
 
 function addMiddleware(devServer) {
     // `proxy` lets you to specify a fallback server during development.
     // Every unrecognized request will be forwarded to it.
     var proxy = require(paths.appPackageJson).proxy;
-    devServer.use(historyApiFallback({
-        // Paths with dots should still use the history fallback.
-        // See https://github.com/facebookincubator/create-react-app/issues/387.
-        disableDotRule: true,
-        // For single page apps, we generally want to fallback to /index.html.
-        // However we also want to respect `proxy` for API calls.
-        // So if `proxy` is specified, we need to decide which fallback to use.
-        // We use a heuristic: if request `accept`s text/html, we pick /index.html.
-        // Modern browsers include text/html into `accept` header when navigating.
-        // However API calls like `fetch()` won’t generally accept text/html.
-        // If this heuristic doesn’t work well for you, don’t use `proxy`.
-        htmlAcceptHeaders: proxy ? ['text/html'] : ['text/html', '*/*']
-    }));
+    devServer.use(
+        historyApiFallback({
+            // Paths with dots should still use the history fallback.
+            // See https://github.com/facebookincubator/create-react-app/issues/387.
+            disableDotRule: true,
+            // For single page apps, we generally want to fallback to /index.html.
+            // However we also want to respect `proxy` for API calls.
+            // So if `proxy` is specified, we need to decide which fallback to use.
+            // We use a heuristic: if request `accept`s text/html, we pick /index.html.
+            // Modern browsers include text/html into `accept` header when navigating.
+            // However API calls like `fetch()` won’t generally accept text/html.
+            // If this heuristic doesn’t work well for you, don’t use `proxy`.
+            htmlAcceptHeaders: proxy ? ['text/html'] : ['text/html', '*/*']
+        })
+    );
     if (proxy) {
         if (typeof proxy !== 'string') {
             console.log(chalk.red('When specified, "proxy" in package.json must be a string.'));
@@ -201,7 +201,7 @@ function addMiddleware(devServer) {
 }
 
 function runDevServer(host, port, protocol) {
-    var devServer = new WebpackDevServer(compiler, {
+    const devServer = new WebpackDevServer(compiler, {
         // Enable gzip compression of generated files.
         compress: false,
         // Silence WebpackDevServer's own logs since they're generally not useful.
@@ -249,7 +249,7 @@ function runDevServer(host, port, protocol) {
         proxy: proxyConfig,
 
         // Enable HTTPS if the HTTPS environment variable is set to 'true'
-        https: protocol === "https",
+        https: protocol === 'https',
         host: host
     });
 
@@ -257,7 +257,7 @@ function runDevServer(host, port, protocol) {
     addMiddleware(devServer);
 
     // Launch WebpackDevServer.
-    devServer.listen(port, err => {
+    devServer.listen(port, host, err => {
         if (err) {
             return console.log(err);
         }
@@ -270,7 +270,7 @@ function runDevServer(host, port, protocol) {
 }
 
 function run(port) {
-    var protocol = process.env.HTTPS === 'true' ? "https" : "http";
+    var protocol = process.env.HTTPS === 'true' ? 'https' : 'http';
     var host = process.env.HOST || 'localhost';
     setupCompiler(host, port, protocol);
     runDevServer(host, port, protocol);
@@ -286,13 +286,17 @@ detect(DEFAULT_PORT).then(port => {
 
     if (isInteractive) {
         var existingProcess = getProcessForPort(DEFAULT_PORT);
-        var question =
-            chalk.yellow('Something is already running on port ' + DEFAULT_PORT + '.' +
-                ((existingProcess) ? ' Probably:\n  ' + existingProcess : '')) +
-            '\n\nWould you like to run the app on another port instead?';
+        var question = {
+            type: 'confirm',
+            name: 'shouldChangePort',
+            message:
+                chalk.yellow('Something is already running on port ' + DEFAULT_PORT + '.' + (existingProcess ? ' Probably:\n  ' + existingProcess : '')) +
+                '\n\nWould you like to run the app on another port instead?',
+            default: true
+        };
 
-        prompt(question, true).then(shouldChangePort => {
-            if (shouldChangePort) {
+        inquirer.prompt(question).then(answer => {
+            if (answer.shouldChangePort) {
                 run(port);
             }
         });

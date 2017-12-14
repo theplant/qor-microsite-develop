@@ -16,10 +16,9 @@ AWS.config.update({
     region: s3info.region
 });
 
-var s3 = new AWS.S3({ apiVersion: '2006-03-01' });
+var s3 = new AWS.S3({apiVersion: '2006-03-01'});
 
 function syncBuildToS3() {
-
     // upload build folder files.
     uploadFolder();
 
@@ -64,7 +63,7 @@ function getFileList(path) {
     filesFound = fs.readdirSync(path);
     for (i = 0; i < filesFound.length; i++) {
         fileInfo = fs.lstatSync(path + filesFound[i]);
-        if (fileInfo.isFile()){
+        if (fileInfo.isFile()) {
             fileList.push(filesFound[i]);
         }
     }
@@ -72,35 +71,37 @@ function getFileList(path) {
     return fileList;
 }
 
-
 function uploadFile(file, folderName) {
     var fileStream = fs.createReadStream(file);
     var fileName = path.basename(file);
-    var metaData = mime.lookup(fileName);
+    var metaData = mime.getType(fileName);
     var bucketName = BUCKET_NAME;
 
     if (folderName) {
         bucketName = BUCKET_NAME + '/' + folderName;
     }
 
-    s3.upload({
-        ACL: 'public-read',
-        Bucket: bucketName,
-        Key: fileName,
-        Body: fileStream,
-        ContentType: metaData
-    }, function(error, response) {
-        if (error) {
-            console.log("Error", error);
+    s3.upload(
+        {
+            ACL: 'public-read',
+            Bucket: bucketName,
+            Key: fileName,
+            Body: fileStream,
+            ContentType: metaData
+        },
+        function(error, response) {
+            if (error) {
+                console.log('Error', error);
+            }
+            if (response) {
+                console.log('>>>>>>>> File: ' + chalk.green(file) + ' upload success');
+            }
         }
-        if (response) {
-            console.log('>>>>>>>> File: ' + chalk.green(file) + ' upload success');
-        }
-    });
+    );
 }
 
 module.exports = {
     uploadFolder: uploadFolder,
     uploadFile: uploadFile,
     syncBuildToS3: syncBuildToS3
-}
+};
